@@ -8,11 +8,10 @@ import lombok.Setter;
 @Component
 @Setter
 @Getter
-public class ResponseStructure<T>
+public class ExceptionResponse<T>
 {
 	private int status;
-	private String msg;
-	private T data;
+	private String message;
+	private String rootCause;
 
-	
 }
