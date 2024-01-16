@@ -29,13 +29,13 @@ public class UserController
 		return service.saveUser(request);
 	}
 	
-	@GetMapping(value="/users/{userId}")
+	@GetMapping("/users/{userId}")
 	public ResponseEntity<ResponseStructure<UsersResponse>> getUserById(@RequestParam int userId)
 	{
 		return service.getUserById(userId);
 	}
 	
-	@DeleteMapping(value="/users/{userId}")
+	@DeleteMapping("/users/{userId}")
 	public ResponseEntity<ResponseStructure<UsersResponse>> deleteUserById(@RequestParam int userId)
 	{
 		return service.deleteUserById(userId);
