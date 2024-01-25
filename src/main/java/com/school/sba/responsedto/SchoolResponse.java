@@ -1,28 +1,23 @@
-package com.school.sba.entity;
+package com.school.sba.responsedto;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.stereotype.Component;
 
-import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
-@Setter
 @Getter
-@Builder
-@AllArgsConstructor
+@Setter
 @NoArgsConstructor
-public class School 
-{
+@AllArgsConstructor
+@Component
+@Builder
+public class SchoolResponse {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Id
 	private int schoolId;
@@ -30,11 +25,4 @@ public class School
 	private long contactNo;
 	private String emailId;
 	private String address;
-	
-	@OneToOne
-	private Schedule schedule;
-	
-	@OneToMany(mappedBy = "school")
-	private List<AcademicProgram> academicProgramsList;
-	
 }

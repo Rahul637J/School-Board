@@ -6,6 +6,8 @@ import com.school.sba.requestdto.UsersRequest;
 import com.school.sba.responsedto.UsersResponse;
 import com.school.sba.util.ResponseStructure;
 
+import jakarta.validation.Valid;
+
 public interface UserService 
 {
 
@@ -14,6 +16,8 @@ public interface UserService
 	ResponseEntity<ResponseStructure<UsersResponse>> getUserById(int userId);
 
 	ResponseEntity<ResponseStructure<UsersResponse>> deleteUserById(int userId);
+
+	ResponseEntity<ResponseStructure<UsersResponse>> saveAdmin(@Valid UsersRequest request);
 	
 
 }

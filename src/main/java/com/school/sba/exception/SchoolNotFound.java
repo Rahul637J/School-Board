@@ -1,17 +1,13 @@
 package com.school.sba.exception;
 
-public class SchoolNotFound extends Exception
-{
-	private String msg;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-	public SchoolNotFound(String msg) 
-	{
-		this.msg = msg;
-	}
+@Getter
+@AllArgsConstructor
+public class SchoolNotFound extends RuntimeException
+{
+	private String message;
+
 	
-	@Override
-	public String getMessage() 
-	{
-		return msg;
-	}
 }

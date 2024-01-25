@@ -1,72 +1,76 @@
 package com.school.sba.util;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
-import org.springframework.validation.method.MethodValidationException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.school.sba.exception.AcademicProgramNotFoundById;
+import com.school.sba.exception.AcademicProgramNotFoundException;
 import com.school.sba.exception.DuplicateEntryException;
+import com.school.sba.exception.IllegalRequestException;
 import com.school.sba.exception.InvalidUserException;
+import com.school.sba.exception.ScheduleNotFoundException;
+import com.school.sba.exception.SchoolNotFound;
+import com.school.sba.exception.SubjectNotAddedException;
 import com.school.sba.exception.UserNotFoundException;
 
 @RestControllerAdvice
-public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler
-{
-	
-	@Autowired
-	ExceptionResponse<String> structure;
-	
-	private ResponseEntity<Object> error(HttpStatus status,String message, Object rootcause)
-	{
-		return new ResponseEntity<Object> (Map.of(
-				"status",status.value(),
-				"message",message,
-				"rootcause",rootcause),status);
-	}
-	
-	@Override
-	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-			HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-		List<ObjectError> allErrors = ex.getAllErrors();
-		Map<String, String> map=new HashMap<String, String>();
-		allErrors.forEach(errors->{
-			FieldError fieldError=(FieldError)errors;
-			map.put(fieldError.getField(), fieldError.getDefaultMessage());
-		});
-		return error(HttpStatus.BAD_REQUEST,"Bad Request", ex.getMessage());//"UserName or email cannot be null or empty"
+public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler {
+
+	private ResponseEntity<Object> error(HttpStatus status, String message, Object rootcause) {
+		return new ResponseEntity<Object>(Map.of(
+				"status", status.value(),
+				"message", message,
+				"rootcause", rootcause),
+				status);
 	}
 	
 	@ExceptionHandler(DuplicateEntryException.class)
-	public ResponseEntity<ExceptionResponse<String>> duplicteAdmin(DuplicateEntryException dex)
-	{
-		error(HttpStatus.NOT_FOUND, dex.getMessage(), "The Admin is already Exist");
-		return new ResponseEntity<ExceptionResponse<String>>(structure,HttpStatus.BAD_REQUEST);
+	public ResponseEntity<Object> duplicateEntryException(DuplicateEntryException dex) {
+		return error(HttpStatus.NOT_FOUND, dex.getMessage(), "Change the UserName or email");
 	}
-	
+
 	@ExceptionHandler(InvalidUserException.class)
-	public ResponseEntity<ExceptionResponse<String>> invalidUser(InvalidUserException unf)
-	{
-		error(HttpStatus.NOT_FOUND, unf.getMessage(), "The Admin is already Exist");
-		return new ResponseEntity<ExceptionResponse<String>>(structure,HttpStatus.NOT_FOUND);
+	public ResponseEntity<Object> invalidUser(InvalidUserException unf) {
+		return error(HttpStatus.NOT_FOUND, unf.getMessage(), "The Admin is already Exist");
+	}
+
+	@ExceptionHandler(UserNotFoundException.class)
+	public ResponseEntity<Object> userNotFound(UserNotFoundException unf) {
+		return error(HttpStatus.NOT_FOUND, unf.getMessage(), "User Not Found");
+	}
+
+	@ExceptionHandler(IllegalRequestException.class)
+	public ResponseEntity<Object> illegalRequestException(IllegalRequestException ex) {
+		return error(HttpStatus.NOT_FOUND, ex.getMessage(), "User Has Not Access");
 	}
 	
-	@ExceptionHandler(UserNotFoundException.class)
-	public ResponseEntity<ExceptionResponse<String>> userNotFound(InvalidUserException unf)
-	{
-		error(HttpStatus.NOT_FOUND, unf.getMessage(), "User Not Found");
-		return new ResponseEntity<ExceptionResponse<String>>(structure,HttpStatus.NOT_FOUND);
+	@ExceptionHandler(ScheduleNotFoundException.class)
+	public ResponseEntity<Object> scheduleNotFound(ScheduleNotFoundException snf){
+		return error(HttpStatus.NOT_FOUND,snf.getMessage() ,"Schedule is not Yet created");
+	}
+	
+	@ExceptionHandler(AcademicProgramNotFoundException.class)
+	public ResponseEntity<Object> academicProgramNotFound(AcademicProgramNotFoundException snf){
+		return error(HttpStatus.NOT_FOUND,snf.getMessage() ,"Academic Program Not Found");
+	}
+	
+	@ExceptionHandler(AcademicProgramNotFoundById.class)
+	public ResponseEntity<Object> academicProgramNotFoundById(AcademicProgramNotFoundById snf){
+		return error(HttpStatus.NOT_FOUND,snf.getMessage() ,"Academic Program Not Found By Id ");
+	}
+	
+	@ExceptionHandler(SchoolNotFound.class)
+	public ResponseEntity<Object> schoolNotFound(SchoolNotFound snf){
+		return error(HttpStatus.NOT_FOUND,snf.getMessage() ,"School Not Found");
+	}
+	
+	@ExceptionHandler(SubjectNotAddedException.class)
+	public ResponseEntity<Object> subjectNotPresent(SubjectNotAddedException snf){
+		return error(HttpStatus.NOT_FOUND,snf.getMessage() ,"Subjects Not present in Database");
 	}
 }

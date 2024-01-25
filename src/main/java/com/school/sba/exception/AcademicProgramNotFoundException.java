@@ -5,9 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
-public class UserNotFoundException extends RuntimeException
-{
+@NoArgsConstructor
+
+public class AcademicProgramNotFoundException extends RuntimeException {
 	private String message;
 }

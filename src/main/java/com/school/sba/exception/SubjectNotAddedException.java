@@ -2,17 +2,11 @@ package com.school.sba.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @AllArgsConstructor
-public class DuplicateEntryException extends RuntimeException
-{
+@NoArgsConstructor
+public class SubjectNotAddedException extends RuntimeException {
 	private String message;
-	
-	
-	
-	
-	
-	 
-
 }
