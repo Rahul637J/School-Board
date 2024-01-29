@@ -48,7 +48,6 @@ public class SchoolServiceImpl implements SchoolService
 				.build();
 	}
 	
-
 	@Override
 	public ResponseEntity<ResponseStructure<SchoolResponse>> saveSchool(int userId, SchoolRequest request) {
 	  return userRepo.findById(userId).map(u->{
@@ -74,9 +73,10 @@ public class SchoolServiceImpl implements SchoolService
 			}
 		}
 	).orElseThrow(()-> new InvalidUserException("User is not present"));
-}
-
-
+  }
+		
+	
+	
 	
 	
 	

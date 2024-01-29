@@ -18,6 +18,8 @@ public interface UserService
 	ResponseEntity<ResponseStructure<UsersResponse>> deleteUserById(int userId);
 
 	ResponseEntity<ResponseStructure<UsersResponse>> saveAdmin(@Valid UsersRequest request);
+
+	ResponseEntity<ResponseStructure<UsersResponse>> addSubjectToTeacher(int subjectId, int userId);
 	
 
 }

@@ -33,12 +33,13 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Autowired
 	private AcademicProgramServiceImpl academicProgramServiceImpl;
-
-	@Autowired
-	private ResponseStructure<SubjectResponse> responseStructure;
-
-	@Autowired
-	private Subject subject;
+	
+	private SubjectResponse mapToResponse(Subject subject) {
+		return SubjectResponse.builder()
+				.subjectId(subject.getSubjectId())
+				.subjectName(subject.getSubjectName())
+				.build();
+	}
 
 	@Override
 	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> addSubject(SubjectRequest subjectRequest,
@@ -94,15 +95,6 @@ public class SubjectServiceImpl implements SubjectService {
 			 return new ResponseEntity<ResponseStructure<List<SubjectResponse>>>(responseStructure,HttpStatus.FOUND);
 		 }
 		 else
-			 throw new SubjectNotAddedException("Subjects Not Present in database");
+			 throw new SubjectNotAddedException("Not Found");
 	}
-		 
-	private SubjectResponse mapToResponse(Subject subject) {
-		return SubjectResponse.builder()
-				.subjectId(subject.getSubjectId())
-				.subjectName(subject.getSubjectName())
-				.build();
-
-	}
-
 }

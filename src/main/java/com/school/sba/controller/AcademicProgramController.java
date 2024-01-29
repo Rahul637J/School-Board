@@ -39,5 +39,4 @@ public class AcademicProgramController
 	{
 		return academicservice.assignTeachersAndStudent(programId,userId);
 	}
-
 }

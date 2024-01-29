@@ -10,12 +10,15 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import com.school.sba.exception.AcademicProgramNotFoundById;
 import com.school.sba.exception.AcademicProgramNotFoundException;
+import com.school.sba.exception.AdminCannotBeAssignedToAcademicException;
 import com.school.sba.exception.DuplicateEntryException;
 import com.school.sba.exception.IllegalRequestException;
 import com.school.sba.exception.InvalidUserException;
+import com.school.sba.exception.IrreleventTeacherException;
 import com.school.sba.exception.ScheduleNotFoundException;
 import com.school.sba.exception.SchoolNotFound;
 import com.school.sba.exception.SubjectNotAddedException;
+import com.school.sba.exception.UserIsNotAnAdminException;
 import com.school.sba.exception.UserNotFoundException;
 
 @RestControllerAdvice
@@ -72,5 +75,20 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
 	@ExceptionHandler(SubjectNotAddedException.class)
 	public ResponseEntity<Object> subjectNotPresent(SubjectNotAddedException snf){
 		return error(HttpStatus.NOT_FOUND,snf.getMessage() ,"Subjects Not present in Database");
+	}
+	
+	@ExceptionHandler(UserIsNotAnAdminException.class)
+	public ResponseEntity<Object> userNotAdmin(UserIsNotAnAdminException snf){
+		return error(HttpStatus.NOT_FOUND,snf.getMessage() ,"Subjects Not present in Database");
+	}
+	
+	@ExceptionHandler(IrreleventTeacherException.class)
+	public ResponseEntity<Object> irrelavntSubject(IrreleventTeacherException snf){
+		return error(HttpStatus.NOT_FOUND,snf.getMessage() ,"Subjects Not present in Database");
+	}
+	
+	@ExceptionHandler(AdminCannotBeAssignedToAcademicException.class)
+	public ResponseEntity<Object> adminCannotToAcademicProgram(AdminCannotBeAssignedToAcademicException snf){
+		return error(HttpStatus.NOT_FOUND,snf.getMessage() ,"Only Teachers and Students can be assigned to Academic Programs");
 	}
 }

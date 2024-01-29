@@ -21,7 +21,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Component
 @Builder
 @Setter
 @Getter
@@ -43,6 +42,9 @@ public class AcademicProgram
 	@ManyToMany
 	private List<Subject> subject;
 	
-	@ManyToMany(mappedBy = "academicProgramsList")
-	private List<Users> users;
+	@ManyToMany
+	private List<Users> usersList;
+	
+	@ManyToOne
+	private ClassHour classHour;
 }

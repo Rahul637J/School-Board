@@ -9,5 +9,4 @@ class SchoolBoardApiApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
 }
