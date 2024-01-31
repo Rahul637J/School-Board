@@ -6,6 +6,7 @@ import com.school.sba.enums.UserRole;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -39,7 +40,7 @@ public class Users
 	@Column(unique = true)
 	private String email;
 	private UserRole userRole;
-	private boolean deleteUser=false;
+	private boolean deleteUser;
 	
 	@ManyToOne
 	private School school;

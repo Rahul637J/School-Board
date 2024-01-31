@@ -31,6 +31,7 @@ public class School
 	private long contactNo;
 	private String emailId;
 	private String address;
+	private boolean isDelete;
 	
 	@OneToOne
 	private Schedule schedule;

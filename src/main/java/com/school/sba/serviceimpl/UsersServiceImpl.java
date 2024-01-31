@@ -1,14 +1,20 @@
 package com.school.sba.serviceimpl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.school.sba.entity.Subject;
 import com.school.sba.entity.Users;
 import com.school.sba.enums.UserRole;
+import com.school.sba.exception.AcademicProgramNotFoundById;
 import com.school.sba.exception.DuplicateEntryException;
 import com.school.sba.exception.IllegalRequestException;
 import com.school.sba.exception.InvalidUserException;
@@ -16,6 +22,8 @@ import com.school.sba.exception.SchoolNotFound;
 import com.school.sba.exception.SubjectNotFoundException;
 import com.school.sba.exception.UserIsNotAnAdminException;
 import com.school.sba.exception.UserNotFoundException;
+import com.school.sba.exception.UsersNotAssociatedWithAcademicProgram;
+import com.school.sba.repository.AcademicProgramRepo;
 import com.school.sba.repository.SubjectRepo;
 import com.school.sba.repository.UserRepo;
 import com.school.sba.requestdto.UsersRequest;
@@ -35,7 +43,13 @@ public class UsersServiceImpl implements UserService {
 	private PasswordEncoder passwordEncoder;
 	
 	@Autowired
+	private AcademicProgramRepo academicProgramRepo;
+	
+	@Autowired
 	private ResponseStructure<UsersResponse> structure;
+	
+	@Autowired
+	private ResponseStructure<List<UsersResponse>> responseStructureList;
 
 	static boolean admin = false;
 
@@ -51,7 +65,7 @@ public class UsersServiceImpl implements UserService {
 				.userRole(request.getUserRole()).build();
 	}
 
-	private UsersResponse mapToUserResponse(Users response) {
+	public UsersResponse mapToUserResponse(Users response) {
 		return UsersResponse.builder()
 				.userId(response.getUserId())
 				.userName(response.getUserName())
@@ -90,7 +104,7 @@ public class UsersServiceImpl implements UserService {
 					Users user1 = mapToUsers(request);
 					user1.setSchool(user.getSchool());
 					structure.setStatus(HttpStatus.CREATED.value());
-					structure.setMsg(authenticatedName);
+					structure.setMsg("Admin "+authenticatedName+" added the "+user1.getFirstName()+" "+user1.getUserRole());
 					structure.setData(mapToUserResponse(userRepo.save(user1)));
 				}
 				else
@@ -140,9 +154,37 @@ public class UsersServiceImpl implements UserService {
 					throw new IllegalRequestException("Only Teacher can have subject");
 			}).orElseThrow(()->new SubjectNotFoundException("Subject is not found"));
 			structure.setStatus(HttpStatus.CREATED.value());
-			structure.setMsg("Subject Added to Teacher");
+			structure.setMsg(user.getFirstName()+" is assigned to the Subject");
 			structure.setData(mapToUserResponse(user));
 			return new ResponseEntity<ResponseStructure<UsersResponse>>(structure,HttpStatus.CREATED);
 		}).orElseThrow(()->new UserNotFoundException("User is Not found"));
+	}
+
+	@Override
+	public ResponseEntity<ResponseStructure<List<UsersResponse>>> fetchUserByRole(int programId, UserRole role) {
+		List<UsersResponse> aList=new ArrayList<UsersResponse>();
+		return academicProgramRepo.findById(programId).map(program->{
+			if(program.getUsersList().size()!=0)
+			{
+				program.getUsersList().forEach(users->{
+					if(!role.equals(UserRole.ADMIN))
+						{
+							System.out.println(users.getUserRole());
+						if(users.getUserRole().equals(role))
+							{
+								aList.add(mapToUserResponse(users));
+							}
+						}
+					else
+					throw new InvalidUserException("Admin cannot access Academic Program");
+			});
+				responseStructureList.setStatus(HttpStatus.FOUND.value());
+				responseStructureList.setMsg("User Data Found!!!");
+				responseStructureList.setData(aList);
+				return new ResponseEntity<ResponseStructure<List<UsersResponse>>>(responseStructureList,HttpStatus.FOUND);
+			}
+			else
+				throw new UsersNotAssociatedWithAcademicProgram("Users not present in the academic program");
+		}).orElseThrow(()-> new AcademicProgramNotFoundById("Invalid academic program Id"));
 	}
 }

@@ -15,15 +15,18 @@ import com.school.sba.enums.UserRole;
 import com.school.sba.exception.AcademicProgramNotFoundById;
 import com.school.sba.exception.AcademicProgramNotFoundException;
 import com.school.sba.exception.AdminCannotBeAssignedToAcademicException;
+import com.school.sba.exception.InvalidUserException;
 import com.school.sba.exception.IrreleventTeacherException;
 import com.school.sba.exception.SchoolNotFound;
 import com.school.sba.exception.UserNotFoundException;
+import com.school.sba.exception.UsersNotAssociatedWithAcademicProgram;
 import com.school.sba.repository.AcademicProgramRepo;
 import com.school.sba.repository.SchoolRepository;
 import com.school.sba.repository.SubjectRepo;
 import com.school.sba.repository.UserRepo;
 import com.school.sba.requestdto.AcademicProgramRequest;
 import com.school.sba.responsedto.AcademicProgramResponse;
+import com.school.sba.responsedto.UsersResponse;
 import com.school.sba.service.AcademicProgramService;
 import com.school.sba.util.ResponseStructure;
 
@@ -38,7 +41,7 @@ public class AcademicProgramServiceImpl implements AcademicProgramService
 	
 	@Autowired
 	private ResponseStructure<AcademicProgramResponse> responseStructure;
-	
+		
 	@Autowired
 	private UserRepo userRepo;
 		
@@ -95,49 +98,59 @@ public class AcademicProgramServiceImpl implements AcademicProgramService
 		}).orElseThrow(()-> new SchoolNotFound("Invalid School Id"));
 		}	
 	
-	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> assignTeachersAndStudent(int programId,
-			int userId) {
+	@Override
+	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> assignTeachersAndStudent(int programId,int userId) {
 		return userRepo.findById(userId).map(user->{
 			return academicProgramRepo.findById(programId).map(program->{
-				
 				if(user.getUserRole()!=UserRole.ADMIN)
 				{
 					if(user.getUserRole()==UserRole.STUDENT)
 					{
-						user.getAcademicProgramsList().add(program);
-						userRepo.save(user);
+						System.out.println("From Student"+user.getUserRole());
 						program.getUsersList().add(user);
 						academicProgramRepo.save(program);
-						responseStructure.setStatus(HttpStatus.CREATED.value());
-						responseStructure.setMsg(user.getUserRole()+" added is Added to academic Program");
-						responseStructure.setData(mapToResponse(program));
-					 }
-						 if(user.getUserRole()==UserRole.TEACHER)
-							{
-								program.getSubject().forEach(subject->{
-									if(user.getSubject()==subject)
-									{		
+					}
+					
+					if(user.getUserRole()==UserRole.TEACHER)
+					 {
+						System.out.println("From Teacher");
+							 if(program.getSubject().contains(user.getSubject())){
 									program.getUsersList().add(user);
 									academicProgramRepo.save(program);
-									
 									}
 									else
 										throw new IrreleventTeacherException("The Subject of the Teacher is irreveleant to academic program subject ");
-								});
-							
-						user.getAcademicProgramsList().add(program);
-						userRepo.save(user);
-						program.getUsersList().add(user);
-						academicProgramRepo.save(program);
-						responseStructure.setStatus(HttpStatus.CREATED.value());
-						responseStructure.setMsg(user.getUserRole()+" added is Added to academic Program");
-						responseStructure.setData(mapToResponse(program));
 					 }
+					responseStructure.setStatus(HttpStatus.CREATED.value());
+					responseStructure.setMsg(user.getUserRole()+" added is Added to academic Program");
+					responseStructure.setData(mapToResponse(program));
 					return new ResponseEntity<ResponseStructure<AcademicProgramResponse>>(responseStructure,HttpStatus.CREATED);
 				}
 				else
 					throw new AdminCannotBeAssignedToAcademicException("Admin cannot assigned to the Academic program");
 			}).orElseThrow(()-> new AcademicProgramNotFoundById("Academic Program is not found in given ID"));
 		}).orElseThrow(()->new UserNotFoundException("User is not found in the given ID"));
-         }			
+         }
+
+	@Override
+	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> deleteAcademicProgram(int academicProgramId) 
+	{
+		return academicProgramRepo.findById(academicProgramId).map(program->{
+			if(program.isDelete()==false)
+			{
+				program.setDelete(true);
+				academicProgramRepo.save(program);
+				responseStructure.setStatus(HttpStatus.OK.value());
+				responseStructure.setMsg("AcademicProgram Deleted Successful!!!");
+				responseStructure.setData(mapToResponse(program));
+			}
+			else {
+				responseStructure.setStatus(HttpStatus.OK.value());
+				responseStructure.setMsg("AcademicProgram Already Deleted!!!");
+				responseStructure.setData(mapToResponse(program));
+			}
+			return new ResponseEntity<ResponseStructure<AcademicProgramResponse>>(responseStructure,HttpStatus.OK);
+		}).orElseThrow(()-> new AcademicProgramNotFoundById("Invalid Academic Program ID"));
+		
+	}			
 }

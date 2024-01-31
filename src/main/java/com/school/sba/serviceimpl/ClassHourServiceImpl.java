@@ -18,13 +18,20 @@ import com.school.sba.enums.ClassStatus;
 import com.school.sba.enums.UserRole;
 import com.school.sba.exception.AcademicProgramNotFoundById;
 import com.school.sba.exception.ClassHourNotFound;
+import com.school.sba.exception.ClassRoomNotFreeException;
+import com.school.sba.exception.InvalidClassHourIdException;
+import com.school.sba.exception.InvalidUserRoleException;
 import com.school.sba.exception.ScheduleNotFoundException;
 import com.school.sba.exception.SchoolNotFound;
 import com.school.sba.exception.SubjectNotFoundException;
+import com.school.sba.exception.UserNotFoundException;
 import com.school.sba.repository.AcademicProgramRepo;
 import com.school.sba.repository.ClassHourRepo;
+import com.school.sba.repository.SubjectRepo;
+import com.school.sba.repository.UserRepo;
 import com.school.sba.requestdto.ClassHourRequest;
 import com.school.sba.requestdto.ClassHourRequestUpdate;
+import com.school.sba.responsedto.ClassHourResponse;
 import com.school.sba.service.ClassHourService;
 import com.school.sba.util.ResponseStructure;
 
@@ -39,6 +46,24 @@ public class ClassHourServiceImpl implements ClassHourService
 	
 	@Autowired
 	private ResponseStructure<String> responseStructure;
+	
+	@Autowired
+	private ResponseStructure<List<ClassHourResponse>> responseStructure1;
+	
+	@Autowired
+	private UserRepo userRepo;
+	
+	@Autowired
+	private SubjectRepo subjectRepo;
+	
+	private ClassHourResponse mapToClassHourResponse(ClassHour save) {
+		return ClassHourResponse.builder()
+				.classHourId(save.getClassHourId())
+				.beginsAt(save.getBeginsAt())
+				.roomNo(save.getRoomNo())
+				.subject(save.getSubject())
+				.build();
+	}
 	
 	private boolean isBreakTime(LocalDateTime beginsAt, LocalDateTime endsAt, Schedule schedule)
 	{
@@ -124,35 +149,79 @@ public class ClassHourServiceImpl implements ClassHourService
 	}
 
 	@Override
-	public ResponseEntity<ResponseStructure<String>> updateClassHour(List<ClassHourRequestUpdate> classHourRequest) 
+	public ResponseEntity<ResponseStructure<List<ClassHourResponse>>> updateClassHour(List<ClassHourRequestUpdate> classHourRequest) 
 	{
-		ArrayList<Object> arrayList=new ArrayList<Object>();
-		classHourRequest.forEach(request->
-		{
-			if((request.getUsers().getUserId()!=0) && (request.getUsers().getUserRole()==UserRole.TEACHER))
-			{
-				if(request.getSubject().getSubjectId()!=0)
-				{
-					if(request.getClassHourId()!=0)
-					{
-						arrayList.add(request.getUsers().getUserId());
-						arrayList.add(request.getSubject().getSubjectId());
-						arrayList.add(request.getClassHourId());
-					}
-					else 
-						throw new ClassHourNotFound("Invalid ClassHour ID");
-				}
-				else
-					throw new SubjectNotFoundException("Invalid Subject Id");
+			ArrayList<ClassHourResponse> alist = new ArrayList<>();
+			if (!classHourRequest.isEmpty()) {
+				classHourRequest.forEach(classHour -> {
+					classHourRepo.findById(classHour.getClassHourId()).map(classHourdb -> {
+						if (!classHourRepo.existsByBeginsAtAndRoomNo(classHourdb.getBeginsAt(),
+								classHour.getRoomNo())) {
+							subjectRepo.findById(classHour.getSubjectId()).map(subject -> {
+
+								if (LocalDateTime.now().isBefore(classHourdb.getEndsAt())
+										&& LocalDateTime.now().isAfter(classHourdb.getBeginsAt())) {
+									classHourdb.setRoomNo(classHour.getRoomNo());
+									classHourdb.setSubject(subject);
+									classHourdb.setClassStatus(ClassStatus.ONGOING);
+								} else if (classHourdb.getBeginsAt().toLocalTime().equals(userRepo
+										.findById(classHour.getUsersId()).get().getSchool().getSchedule().getLunchTime())) {
+									classHourdb.setClassStatus(ClassStatus.LUNCH_TIME);
+									classHourdb.setSubject(null);
+
+								} else if (classHourdb.getBeginsAt().toLocalTime().equals(userRepo
+										.findById(classHour.getUsersId()).get().getSchool().getSchedule().getBreakTime())) {
+									classHourdb.setClassStatus(ClassStatus.BREAK_TIME);
+									classHourdb.setSubject(null);
+
+								} else if (classHourdb.getBeginsAt().isBefore(LocalDateTime.now())) {
+									classHourdb.setRoomNo(classHour.getRoomNo());
+									classHourdb.setSubject(subject);
+									classHourdb.setClassStatus(ClassStatus.COMPLETE);
+								} else if (classHourdb.getBeginsAt().isAfter(LocalDateTime.now())) {
+									classHourdb.setRoomNo(classHour.getRoomNo());
+									classHourdb.setSubject(subject);
+									classHourdb.setClassStatus(ClassStatus.UPCOMING);
+								}
+								return classHourdb;
+							}).orElseThrow(() -> new SubjectNotFoundException("invalid Subject ID  !!!"));
+						} else {
+							throw new ClassRoomNotFreeException(" not free !!!");
+						}
+
+						userRepo.findById(classHour.getUsersId()).map(user -> {
+
+							if (user.getUserRole()==UserRole.TEACHER) {
+
+								classHourdb.setUsers(user);
+								return classHourdb;
+							} else {
+								throw new InvalidUserRoleException("invalid User role !!!TEACHER required ");
+							}
+						}).orElseThrow(() -> new UserNotFoundException("invalid ID!!!"));
+						alist.add(mapToClassHourResponse(classHourRepo.save(classHourdb)));
+						responseStructure1.setData(alist);
+						responseStructure1.setMsg("Class Room already occupied!!!");
+						responseStructure1.setStatus(HttpStatus.ACCEPTED.value());
+						return classHourdb;
+					}).orElseThrow(() -> new InvalidClassHourIdException("invalid ID"));
+				});
 			}
-			else 
-				throw new UsernameNotFoundException("Invalid User Id OR Only TEACHER can Have the classHour");
+			return new ResponseEntity<ResponseStructure<List<ClassHourResponse>>>(responseStructure1, HttpStatus.OK);
+		}
+	
+	private ResponseEntity<ResponseStructure<List<ClassHourResponse>>> deleteClassHour(List<ClassHour> classHourList)
+	{
+		ArrayList<ClassHourResponse> responseList=new ArrayList<ClassHourResponse>();
+		classHourList.forEach(classHour->{
+			classHourRepo.delete(classHour);
+			responseList.add(mapToClassHourResponse(classHour));
 		});
-		Integer hour = arrayList.get(2);
-		if()
-		responseStructure.setStatus(HttpStatus.CREATED.value());
-		responseStructure.setMsg("ClassHour Upddated Successful!!!");
-		responseStructure.setData("ClassHour Data Updated With RoomNO");
-		return ResponseEntity<ResponseStructure<String>>(responseStructure,HttpStatus.CREATED);
+		ResponseStructure<List<ClassHourResponse>> responseStructure=new ResponseStructure<List<ClassHourResponse>>();
+		responseStructure.setStatus(HttpStatus.OK.value());
+		responseStructure.setMsg("ClassHour Deleted Successful!!!");
+		responseStructure.setData(responseList);
+		return new ResponseEntity<ResponseStructure<List<ClassHourResponse>>>(responseStructure,HttpStatus.OK);
+	}
 	}	
-}
+

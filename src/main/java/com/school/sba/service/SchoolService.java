@@ -10,5 +10,7 @@ public interface SchoolService
 {
 
 	ResponseEntity<ResponseStructure<SchoolResponse>> saveSchool(int userId, SchoolRequest request);
+
+	ResponseEntity<ResponseStructure<SchoolResponse>> deleteSchoolById(int schoolId);
 	
 }

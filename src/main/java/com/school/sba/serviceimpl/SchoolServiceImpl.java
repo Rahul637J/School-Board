@@ -10,6 +10,7 @@ import com.school.sba.entity.School;
 import com.school.sba.enums.UserRole;
 import com.school.sba.exception.IllegalRequestException;
 import com.school.sba.exception.InvalidUserException;
+import com.school.sba.exception.SchoolNotFound;
 import com.school.sba.repository.SchoolRepository;
 import com.school.sba.repository.UserRepo;
 import com.school.sba.requestdto.SchoolRequest;
@@ -74,6 +75,25 @@ public class SchoolServiceImpl implements SchoolService
 		}
 	).orElseThrow(()-> new InvalidUserException("User is not present"));
   }
+
+	@Override
+	public ResponseEntity<ResponseStructure<SchoolResponse>> deleteSchoolById(int schoolId) {
+		School school = schoolRepo.findById(schoolId).orElseThrow(()-> new SchoolNotFound("Invalid school Id"));
+		if(school.isDelete()==false)
+		{
+			school.setDelete(true);
+			schoolRepo.save(school);
+			structure.setStatus(HttpStatus.OK.value());
+			structure.setMsg("School deleted Successful!!");
+			structure.setData(mapToResponse(school));
+		}
+		else {
+			structure.setStatus(HttpStatus.OK.value());
+			structure.setMsg("School Already deleted!!!");
+			structure.setData(mapToResponse(school));
+		}
+		return new ResponseEntity<ResponseStructure<SchoolResponse>>(structure,HttpStatus.OK);
+	}
 		
 	
 	

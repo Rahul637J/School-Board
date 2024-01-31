@@ -2,6 +2,7 @@ package com.school.sba.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,5 +25,11 @@ public class SchoolController
 	{
 		System.out.println("Hello");
 		return schoolService.saveSchool(userId, request);
+	}
+	
+	@DeleteMapping("/deleteById/{schoolId}/schools")
+	public ResponseEntity<ResponseStructure<SchoolResponse>> deleteSchoolById(@PathVariable int schoolId)
+	{
+		return schoolService.deleteSchoolById(schoolId);
 	}
 }
