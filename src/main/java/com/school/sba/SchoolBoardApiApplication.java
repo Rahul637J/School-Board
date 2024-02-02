@@ -12,7 +12,6 @@ public class SchoolBoardApiApplication {
 	{
 		SpringApplication.run(SchoolBoardApiApplication.class, args);
 		System.out.println("Ran Successful");
-		
 	}
 	
 }

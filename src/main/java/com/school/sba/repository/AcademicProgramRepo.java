@@ -12,7 +12,5 @@ public interface AcademicProgramRepo extends JpaRepository<AcademicProgram, Inte
 
 	List<AcademicProgram> findAllByIsDelete(boolean b);
 
-	List<AcademicProgram> findBySchool(School school);
-
-	
+	List<AcademicProgram> findBySchool(School school);	
 }

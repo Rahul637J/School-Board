@@ -24,6 +24,7 @@ import com.school.sba.exception.UserIsNotAnAdminException;
 import com.school.sba.exception.UserNotFoundException;
 import com.school.sba.exception.UsersNotAssociatedWithAcademicProgram;
 import com.school.sba.repository.AcademicProgramRepo;
+import com.school.sba.repository.ClassHourRepo;
 import com.school.sba.repository.SubjectRepo;
 import com.school.sba.repository.UserRepo;
 import com.school.sba.requestdto.UsersRequest;
@@ -47,6 +48,9 @@ public class UsersServiceImpl implements UserService {
 	
 	@Autowired
 	private ResponseStructure<UsersResponse> structure;
+	
+	@Autowired
+	private ClassHourRepo classHourRepo;
 	
 	@Autowired
 	private ResponseStructure<List<UsersResponse>> responseStructureList;
@@ -99,7 +103,6 @@ public class UsersServiceImpl implements UserService {
 	{
 		String authenticatedName = SecurityContextHolder.getContext().getAuthentication().getName();
 		return userRepo.findByUserName(authenticatedName).map(user -> {
-			
 				if (request.getUserRole()!=UserRole.ADMIN) {
 					Users user1 = mapToUsers(request);
 					user1.setSchool(user.getSchool());
@@ -186,5 +189,21 @@ public class UsersServiceImpl implements UserService {
 			else
 				throw new UsersNotAssociatedWithAcademicProgram("Users not present in the academic program");
 		}).orElseThrow(()-> new AcademicProgramNotFoundById("Invalid academic program Id"));
+	}
+	
+	public void deleteUsers()
+	{	
+		List<Users> findAllByIsDelete = userRepo.findAllByDeleteUser(true);
+		for(Users user:findAllByIsDelete)
+		{
+			System.out.println(user.getUserId());
+			user.setAcademicProgramsList(null);
+			userRepo.save(user);
+			classHourRepo.findByUsers(user).forEach(classhour->{
+				classhour.setUsers(null);
+				classHourRepo.save(classhour);
+			});			
+			userRepo.delete(user);
+		}
 	}
 }

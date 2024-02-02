@@ -21,6 +21,7 @@ import com.school.sba.exception.SchoolNotFound;
 import com.school.sba.exception.UserNotFoundException;
 import com.school.sba.exception.UsersNotAssociatedWithAcademicProgram;
 import com.school.sba.repository.AcademicProgramRepo;
+import com.school.sba.repository.ClassHourRepo;
 import com.school.sba.repository.SchoolRepository;
 import com.school.sba.repository.SubjectRepo;
 import com.school.sba.repository.UserRepo;
@@ -44,6 +45,9 @@ public class AcademicProgramServiceImpl implements AcademicProgramService
 		
 	@Autowired
 	private UserRepo userRepo;
+	
+	@Autowired
+	private ClassHourRepo classHourRepo;
 		
 	AcademicProgramResponse mapToResponse(AcademicProgram academicProgram) {
 		return AcademicProgramResponse.builder()
@@ -150,7 +154,15 @@ public class AcademicProgramServiceImpl implements AcademicProgramService
 				responseStructure.setData(mapToResponse(program));
 			}
 			return new ResponseEntity<ResponseStructure<AcademicProgramResponse>>(responseStructure,HttpStatus.OK);
-		}).orElseThrow(()-> new AcademicProgramNotFoundById("Invalid Academic Program ID"));
-		
-	}			
+		}).orElseThrow(()-> new AcademicProgramNotFoundById("Invalid Academic Program ID"));	
+	}
+	
+	public void deleteAcademicPrograms()
+	{
+		List<AcademicProgram>academicProgram=academicProgramRepo.findAllByIsDelete(true);
+		academicProgram.forEach(program->{
+			classHourRepo.deleteAll(program.getClassHour());
+			academicProgramRepo.delete(program);
+		});
+	}
 }

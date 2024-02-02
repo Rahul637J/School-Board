@@ -14,6 +14,7 @@ import com.school.sba.exception.AdminCannotBeAssignedToAcademicException;
 import com.school.sba.exception.ClassRoomNotFreeException;
 import com.school.sba.exception.DuplicateEntryException;
 import com.school.sba.exception.IllegalRequestException;
+import com.school.sba.exception.InvalidClassHourDuratioion;
 import com.school.sba.exception.InvalidClassHourIdException;
 import com.school.sba.exception.InvalidUserException;
 import com.school.sba.exception.InvalidUserRoleException;
@@ -115,6 +116,12 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
 	public ResponseEntity<Object> classRoomNotFreeException(ClassRoomNotFreeException snf){
 		return error(HttpStatus.NOT_FOUND,snf.getMessage() ,"Class Room Is Already assigned to another Subject");
 	}
+	
+	@ExceptionHandler(InvalidClassHourDuratioion.class)
+	public ResponseEntity<Object> invalidClassHourDurationException(InvalidClassHourDuratioion snf){
+		return error(HttpStatus.NOT_FOUND,snf.getMessage() ,"ClassHourDurations and Schedule Durations are mismatch");
+	}
+	
 	
 	
 }

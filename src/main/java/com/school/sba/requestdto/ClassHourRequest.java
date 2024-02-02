@@ -1,14 +1,16 @@
 package com.school.sba.requestdto;
 
-import java.time.LocalTime;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
-import com.school.sba.enums.ClassStatus;
-
+@Builder
+@Setter
+@Getter
 public class ClassHourRequest 
 {
 	private int classHourId;
-	private LocalTime beginsAt;
-	private LocalTime endsAt;
 	private int roomNo;
-	private ClassStatus classStatus;
+	private int usersId;
+	private int subjectId;
 }
