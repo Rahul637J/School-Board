@@ -20,5 +20,7 @@ public interface ClassHourRepo extends JpaRepository<ClassHour, Integer>
 
 	List<ClassHour> findByEndsAtBetween(LocalDateTime minusDays, LocalDateTime minusDays2);
 
+	List<ClassHour> findAllByAcademicProgramAndBeginsAtBetween(AcademicProgram program, LocalDateTime from,
+			LocalDateTime to);
 
 }

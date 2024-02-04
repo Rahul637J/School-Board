@@ -28,7 +28,7 @@ public class ScheduledJobs {
 	@Autowired 
 	private AcademicProgramRepo academicProgramRepo;
 
-	@Scheduled(fixedDelay =1000l*30)
+	@Scheduled(cron = "0 30 3 * * MON")
 	public void testMethod()
 		{
 			System.out.println("Hello Schedule JObs");
@@ -37,7 +37,7 @@ public class ScheduledJobs {
 			schoolServiceImpl.deleteSchool();
 		}
 	
-	@Scheduled(fixedDelay = 1000l*60*60)
+	@Scheduled(cron = "0 30 3 * * MON")
 	public void autoGenerateClassHour()
 	{
 		System.out.println("Entered");

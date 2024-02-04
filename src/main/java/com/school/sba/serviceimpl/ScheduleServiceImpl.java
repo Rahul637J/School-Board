@@ -64,14 +64,18 @@ public class ScheduleServiceImpl implements ScheduleService {
 			
 	        // Calculate duration between beginsAt and endsAt
 	        Duration duration = Duration.between(opensAt, closesAt);
+//	        System.out.println(duration);
 
 	        // Convert duration to seconds
 	        long seconds = duration.getSeconds();
 
 	        // Convert duration to double (using seconds as a double)
 	        double durationOfDay = (double) seconds;
+//	        System.out.println(durationOfDay/3600);
+//	        System.out.println(((double)((request.getClassHoursPerDay()*request.getClassHourLengthInMinutes())+request.getBreakLengthInMinutes()+request.getLunchLengthInMinutes())/60));
+
 			
-	        if(durationOfDay==((request.getClassHoursPerDay()*request.getClassHourLengthInMinutes())+request.getBreakLengthInMinutes()+request.getLunchLengthInMinutes()))
+	        if((durationOfDay)/3600==((double)((request.getClassHoursPerDay()*request.getClassHourLengthInMinutes())+request.getBreakLengthInMinutes()+request.getLunchLengthInMinutes())/60))
 	        {
 	        	int minutes =0;
 	        	LocalTime start = request.getOpensAt();
@@ -99,9 +103,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 	        	throw new InvalidClassHourDuratioion("Irrevelant ClassHour and Duration of the Day");
 		}
 		 else 
-	        {
 	        	throw new InvalidClassHourIdException("Schedule Already Exist");
-	        }
 	}		
 
 	@Override
@@ -113,9 +115,8 @@ public class ScheduleServiceImpl implements ScheduleService {
 			responseStructure.setMsg("Schedule found successfull!!");
 			responseStructure.setData(mapToResponse(schedule));
 			return new ResponseEntity<ResponseStructure<ScheduleResponse>>(responseStructure, HttpStatus.FOUND);
-		} else {
+		} else 
 			throw new ScheduleNotFoundException("Schedule not found");
-		}
 	}
 
 	@Override
@@ -138,6 +139,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 			
 	        if(durationOfDay==((request.getClassHoursPerDay()*request.getClassHourLengthInMinutes())+request.getBreakLengthInMinutes()+request.getLunchLengthInMinutes()))
 	        {
+	        	System.out.println((request.getClassHoursPerDay()*request.getClassHourLengthInMinutes())+request.getBreakLengthInMinutes()+request.getLunchLengthInMinutes());
 	        	int minutes =0;
 	        	LocalTime start = request.getOpensAt();
 	        	LocalTime breakTime = request.getBreakTime();
