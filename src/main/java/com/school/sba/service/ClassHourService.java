@@ -15,7 +15,6 @@ import com.school.sba.util.ResponseStructure;
 
 public interface ClassHourService
 {
-
 	ResponseEntity<ResponseStructure<List<ClassHourResponse>>> generateClassHourForAcademicProgram(int programId);
 
 	ResponseEntity<ResponseStructure<List<ClassHourResponse>>> updateClassHour(List<ClassHourRequest> classHourRequest);
@@ -26,5 +25,4 @@ public interface ClassHourService
 
 	ResponseEntity<?> writeToExcel(MultipartFile file, int programId, LocalDate fromDate,LocalDate toDate) throws IOException;
 	
-
 }
