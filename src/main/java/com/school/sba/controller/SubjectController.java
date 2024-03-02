@@ -33,7 +33,6 @@ public class SubjectController {
 	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> updateSubjects(@PathVariable int programId,@RequestBody SubjectRequest subjectRequest)
 	{
 		return subjectService.updateSubjects(programId,subjectRequest);
-		
 	}
 	
 	@GetMapping("/subjects")
@@ -41,9 +40,4 @@ public class SubjectController {
 	{
 		return subjectService.getAllSubject();
 	}
-	
-//	@PutMapping("/subjects/{subjectId}/users/{userId}")
-//	public Res
-//	
-
 }

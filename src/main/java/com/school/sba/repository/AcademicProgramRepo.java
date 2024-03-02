@@ -9,6 +9,7 @@ import com.school.sba.entity.School;
 
 public interface AcademicProgramRepo extends JpaRepository<AcademicProgram, Integer>
 {
+	List<AcademicProgram> findAllByIsDelete(boolean b);
 
-	
+	List<AcademicProgram> findBySchool(School school);
 }

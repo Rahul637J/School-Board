@@ -9,6 +9,5 @@ import com.school.sba.entity.Subject;
 public interface SubjectRepo extends JpaRepository<Subject, Integer>{
 
 	Optional<Subject> findBySubjectName(String name);
-
 	
 }
