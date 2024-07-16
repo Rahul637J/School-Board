@@ -15,6 +15,4 @@ public class ExcelRequestDto
 	private LocalDate fromDate;
 	private LocalDate toDate;
 	private String filePath;
-	
-
 }
